@@ -3,12 +3,21 @@ import telegram
 import firebase_admin
 from telegram.ext import Updater, MessageHandler, Filters, CommandHandler, ConversationHandler, CallbackContext
 from firebase_admin import credentials, db
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+import os
 
 # Define your Telegram Bot Token here
 TOKEN = '6204132043:AAGsy6mKP485rFaBVGeeg6p1dSknDo76jlc'
 
-cred = credentials.Certificate("/flyingbox-ab969-firebase-adminsdk-hv8ug-d802857247.json")
+# Get the current directory where your script is located
+current_directory = os.getcwd()
+
+# Define the file name or path relative to the current directory
+file_name = "flyingbox-ab969-firebase-adminsdk-hv8ug-d802857247.json"
+
+# Create the full file path by joining the current directory and file name
+file_path = os.path.join(current_directory, file_name)
+
+cred = credentials.Certificate(file_path)
 firebase_admin.initialize_app(cred, {
     'databaseURL': 'https://flyingbox-ab969-default-rtdb.europe-west1.firebasedatabase.app/'})
 
