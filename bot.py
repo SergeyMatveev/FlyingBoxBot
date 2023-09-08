@@ -8,7 +8,7 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 # Define your Telegram Bot Token here
 TOKEN = '6204132043:AAGsy6mKP485rFaBVGeeg6p1dSknDo76jlc'
 
-cred = credentials.Certificate("c:/tools/flyingbox-ab969-firebase-adminsdk-hv8ug-d802857247.json")
+cred = credentials.Certificate("/flyingbox-ab969-firebase-adminsdk-hv8ug-d802857247.json")
 firebase_admin.initialize_app(cred, {
     'databaseURL': 'https://flyingbox-ab969-default-rtdb.europe-west1.firebasedatabase.app/'})
 
