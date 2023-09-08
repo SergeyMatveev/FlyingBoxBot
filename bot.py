@@ -24,7 +24,7 @@ firebase_admin.initialize_app(cred, {
 
 # Function to start the conversation
 def start(update: telegram.Update, context: CallbackContext):
-    update.message.reply_text("Я отвечу тебе тем же (и сохраню в БД).")
+    update.message.reply_text("Скажи мне что-нибудь...")
     return ConversationHandler.END
 
 
