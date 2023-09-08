@@ -31,7 +31,7 @@ def start(update: telegram.Update, context: CallbackContext):
 # Function to echo the user's message
 def echo_message(update: telegram.Update, context: CallbackContext):
     save_to_firebase(update)
-    user_message = update.message.text
+    user_message = "хуе" + update.message.text
     update.message.reply_text(user_message)
 
 
@@ -54,9 +54,6 @@ def save_to_firebase(update):
         'message': message,
         'timestamp': timestamp
     })
-
-    # Send a reply message to the user
-    update.message.reply_text("Message saved to Firebase!")
 
 
 def main():
