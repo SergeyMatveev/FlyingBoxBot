@@ -18,3 +18,11 @@ def create_inline_buttons():
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     return reply_markup
+
+
+def create_language_buttons():
+    keyboard = [
+        [InlineKeyboardButton("English", callback_data='lang_en'),
+         InlineKeyboardButton("Русский", callback_data='lang_ru')]
+    ]
+    return InlineKeyboardMarkup(keyboard)
