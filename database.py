@@ -1,6 +1,7 @@
 import psycopg2
 import logging
 from constants import DATABASE_NAME, DATABASE_USER, DATABASE_PASSWORD, DATABASE_HOST, DATABASE_PORT
+from datetime import date
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -16,7 +17,7 @@ def connect_to_database():
         )
         return conn
     except Exception as e:
-        logging.error(f"Error connecting to the database: {e}")
+        logging.error(f"Ошибка подключения к базе данных: {e}")
         return None
 
 
@@ -31,7 +32,7 @@ def user_exists(username):
             conn.close()
             return result[0]
         except Exception as e:
-            logging.error(f"Error checking user existence in the database: {e}")
+            logging.error(f"Ошибка проверки пользователя в базе данных: {e}")
             return False
     else:
         return False
@@ -48,7 +49,7 @@ def insert_user_into_database(username):
             conn.close()
             return True
         except Exception as e:
-            logging.error(f"Error inserting user into the database: {e}")
+            logging.error(f"Ошибка добавления вашей учетной записи в базу данных: {e}")
             return False
     else:
         return False
@@ -74,22 +75,47 @@ def update_user_language(username, language_code):
         return False
 
 
-def insert_request_into_database(username, country_from, city_from, country_to, city_to, weight):
+def insert_request_into_database(username, country_from, city_from, country_to, city_to, weight, send_date, what_is_inside):
     conn = connect_to_database()
     if conn:
         try:
             cursor = conn.cursor()
             cursor.execute(
-                "INSERT INTO Requests (username, country_from, city_from, weight, country_to, city_to, created_at) "
-                "VALUES (%s, %s, %s, %s, %s, %s, NOW());",
-                (username, country_from, city_from, weight, country_to, city_to)
+                "INSERT INTO Requests "
+                "(username, country_from, city_from, country_to, city_to, weight, send_date, what_is_inside, created_at, is_completed) "
+                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, NOW(), %s);",
+                (username, country_from, city_from, country_to, city_to, weight, send_date, what_is_inside, False)
             )
             conn.commit()
             cursor.close()
             conn.close()
             return True
         except Exception as e:
-            logging.error(f"Error inserting request into the database: {e}")
+            logging.error(f"Ошибка добавления вашей заявки на отправку посылки в базу данных: {e}")
+            return False
+    else:
+        return False
+
+
+def insert_route_into_database(username, origin_country, origin_city, destination_country, destination_city, comment):
+    conn = connect_to_database()
+    if conn:
+        try:
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                INSERT INTO Routes (user_id, origin_country, origin_city, destination_country, destination_city, comment)
+                SELECT user_id, %s, %s, %s, %s, %s
+                FROM Users WHERE username = %s;
+                """,
+                (origin_country, origin_city, destination_country, destination_city, comment, username)
+            )
+            conn.commit()
+            cursor.close()
+            conn.close()
+            return True
+        except Exception as e:
+            logging.error(f"Ошибка добавления вашей заявки на перевозку в базу данных: {e}")
             return False
     else:
         return False
