@@ -49,17 +49,16 @@ def insert_user_into_database(username):
         return False
 
 
-def insert_request_into_database(username, country_from, city_from, country_to, city_to, weight, send_date,
-                                 what_is_inside, is_package):
+def insert_request_into_database(username, city_from, city_to, weight, send_date, what_is_inside, is_package):
     conn = connect_to_database()
     if conn:
         try:
             cursor = conn.cursor()
             cursor.execute(
                 "INSERT INTO Requests "
-                "(username, country_from, city_from, country_to, city_to, weight, send_date, what_is_inside, created_at, is_completed, is_package) "
-                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, NOW(), %s, %s);",
-                (username, country_from, city_from, country_to, city_to, weight, send_date, what_is_inside, False, is_package)
+                "(username, city_from, city_to, weight, send_date, what_is_inside, created_at, is_completed, is_package) "
+                "VALUES (%s, %s, %s, %s, %s, %s, NOW(), %s, %s);",
+                (username, city_from, city_to, weight, send_date, what_is_inside, False, is_package)
             )
             conn.commit()
             cursor.close()

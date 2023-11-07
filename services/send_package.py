@@ -159,14 +159,10 @@ def what_is_inside(update, context):
     user_data = context.user_data
     is_package = True
     username = update.message.from_user.username
-    context.user_data['country_from'] = "Default"
-    context.user_data['country_to'] = "Default"
 
     if insert_request_into_database(
             username,
-            user_data.get("country_from"),
             user_data.get("city_from"),
-            user_data.get("country_to"),
             user_data.get("city_to"),
             user_data.get("weight"),
             user_data.get("send_date"),
