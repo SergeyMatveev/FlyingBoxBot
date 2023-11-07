@@ -14,7 +14,7 @@ ORIGIN_CITY, DESTINATION_CITY, WEIGHT2, DATE_OF_FLIGHT, COMMENT = range(5)
 def offer_courier_service(update, context):
     logging.info(f"User {update.message.from_user.username} entered offer_courier_service function.")
 
-    if 'conversation' in context.user_data:
+    if 'conversation' in context.user_data and context.user_data['conversation']:
         logging.info(f"Error. User {update.message.from_user.username} tried to start new process without finishing previous.")
         update.message.reply_text(f"Вы уже находитесь в процессе создания заказа.\nЗакончите его или нажмите /cancel")
         return ConversationHandler.END

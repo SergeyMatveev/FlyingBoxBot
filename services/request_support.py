@@ -10,7 +10,7 @@ GROUP_CHAT_ID = '-1001837659021'
 
 def ask_for_issue(update: Update, context: CallbackContext):
     logging.info(f"User {update.message.from_user.username} entered ask_for_issue function.")
-    if 'conversation' in context.user_data:
+    if 'conversation' in context.user_data and context.user_data['conversation']:
         logging.info(f"Error. User {update.message.from_user.username} tried to start new process without finishing previous.")
         update.message.reply_text(f"Вы уже находитесь в процессе создания заказа.\nЗакончите его или нажмите /cancel")
         return ConversationHandler.END

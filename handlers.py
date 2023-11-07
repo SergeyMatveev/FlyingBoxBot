@@ -45,7 +45,7 @@ def cancel(update: Update, context: CallbackContext):
 
 # Define the donate command handler
 def donate(update, context):
-    if 'conversation' in context.user_data:
+    if 'conversation' in context.user_data and context.user_data['conversation']:
         logging.info(f"Error. User {update.message.from_user.username} tried to start new process without finishing previous.")
         update.message.reply_text(f"Вы уже находитесь в процессе создания заказа.\nЗакончите его или нажмите /cancel")
         return ConversationHandler.END
@@ -56,7 +56,7 @@ def donate(update, context):
 
 # Define the about command handler
 def about(update, context):
-    if 'conversation' in context.user_data:
+    if 'conversation' in context.user_data and context.user_data['conversation']:
         logging.info(f"Error. User {update.message.from_user.username} tried to start new process without finishing previous.")
         update.message.reply_text(f"Вы уже находитесь в процессе создания заказа.\nЗакончите его или нажмите /cancel")
         return ConversationHandler.END

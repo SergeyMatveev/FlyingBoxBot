@@ -9,7 +9,7 @@ SELECT_ORDER = 0
 def my_orders(update: Update, context: CallbackContext) -> int:
     logging.info(f"User {update.message.from_user.username} entered my_orders function.")
 
-    if 'conversation' in context.user_data:
+    if 'conversation' in context.user_data and context.user_data['conversation']:
         logging.info(f"Error. User {update.message.from_user.username} tried to start new process without finishing previous.")
         update.message.reply_text(f"Вы уже находитесь в процессе создания заказа.\nЗакончите его или нажмите /cancel")
         return ConversationHandler.END
@@ -23,24 +23,24 @@ def my_orders(update: Update, context: CallbackContext) -> int:
         return ConversationHandler.END
     else:
         for order in orders:
-            created_at = order[9].strftime('%d.%m.%Y')
-            send_date = order[7].strftime('%d.%m.%Y')
+            created_at = order[7].strftime('%d.%m.%Y')
+            send_date = order[5].strftime('%d.%m.%Y')
 
             # Добавляем условный оператор для order[11] - индикатор посылка или перевозка
-            if order[11]:
-                message_text = (f"Ваша посылка 📦 номер {order[0]} от {created_at}\n"
-                                f"Откуда: {order[3].capitalize()}\n"
-                                f"Куда: {order[5].capitalize()}\n"
-                                f"Вес: {float(order[6])} кг\n"
+            if order[9]:
+                message_text = (f"Ваша посылка 📦 №{order[0]} от {created_at}\n"
+                                f"Откуда: {order[2].capitalize()}\n"
+                                f"Куда: {order[3].capitalize()}\n"
+                                f"Вес: {float(order[4])} кг\n"
                                 f"Желаемая дата отправки: {send_date}\n"
-                                f"Комментарий: {order[8].capitalize()}\n")
+                                f"Комментарий: {order[6].capitalize()}\n")
             else:
-                message_text = (f"Ваша перевозка ✈️ номер {order[0]} от {created_at}\n"
-                                f"Откуда: {order[3].capitalize()}\n"
-                                f"Куда: {order[5].capitalize()}\n"
-                                f"Готовы взять: {float(order[6])} кг\n"
+                message_text = (f"Ваша перевозка ✈️ №{order[0]} от {created_at}\n"
+                                f"Откуда: {order[2].capitalize()}\n"
+                                f"Куда: {order[3].capitalize()}\n"
+                                f"Готовы взять: {float(order[4])} кг\n"
                                 f"Дата поездки: {send_date}\n"
-                                f"Комментарий: {order[8].capitalize()}\n")
+                                f"Комментарий: {order[6].capitalize()}\n")
 
             update.message.reply_text(message_text)
 
