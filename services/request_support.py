@@ -24,7 +24,7 @@ def forward_to_group(update: Update, context: CallbackContext):
     context.user_data['support'] = update.message.text
     user_message = update.message.text
     user_username = update.message.from_user.username
-    context.bot.send_message(GROUP_CHAT_ID, f"Сообщение от пользователя {user_username}: {user_message}")
-    update.message.reply_text("Спасибо за ваше обращение! Мы рассмотрим вашу проблему как можно скорее.")
+    context.bot.send_message(GROUP_CHAT_ID, f"Сообщение от пользователя @{user_username}: {user_message}")
+    update.message.reply_text("Спасибо за обращение! Мы рассмотрим вашу проблему как можно скорее.")
     context.user_data['conversation'] = False
     return ConversationHandler.END

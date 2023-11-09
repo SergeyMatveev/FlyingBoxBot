@@ -48,15 +48,12 @@ def send_package(update, context):
         update.message.reply_text(f"Вы находитесь в процессе создания нового заказа.\n"
                                   f"Закончите его или отправьте /cancel для отмены.\n\n"
                                   f"Шаг 1/5. Введите город отправления посылки:\n")
-        logging.info("Sent request for country of origin.")
 
         context.user_data['country_from_attempts'] = 0
         context.user_data['country_to_attempts'] = 0
         context.user_data['city_from_attempts'] = 0
         context.user_data['city_to_attempts'] = 0
         context.user_data['date_attempts'] = 0
-
-        logging.info("Initialized user data for attempts.")
 
         return CITY_FROM
 
@@ -108,9 +105,13 @@ def weight(update, context):
     weight_str = update.message.text
     parsed_weight = parse_weight(weight_str)
     if parsed_weight is not None:
-        context.user_data['weight'] = parsed_weight
-        update.message.reply_text("Шаг 4/5. Введите желаемую дату отправления (дд.мм.гггг):")
-        return SEND_DATE
+        if parsed_weight > 100:
+            update.message.reply_text("FlyingBox рассчитан на перевозки до 100 кг. Пожалуйста, введите новый вес.")
+            return WEIGHT  # This will prompt the user to enter the weight again
+        else:
+            context.user_data['weight'] = parsed_weight
+            update.message.reply_text("Шаг 4/5. Введите желаемую дату отправления (дд.мм.гггг):")
+            return SEND_DATE
     else:
         update.message.reply_text("Похоже, что вес введен некорректно. Пожалуйста, попробуйте еще раз.")
         return WEIGHT
@@ -160,17 +161,22 @@ def what_is_inside(update, context):
     is_package = True
     username = update.message.from_user.username
 
-    if insert_request_into_database(
-            username,
-            user_data.get("city_from"),
-            user_data.get("city_to"),
-            user_data.get("weight"),
-            user_data.get("send_date"),
-            user_data.get("what_is_inside"),
-            is_package
-    ):
-        update.message.reply_text("Ваша посылка 📦 успешно сохранена.\nОна доступна в главном меню в разделе Мои заказы")
+    # insert_request_into_database now returns the order ID instead of True/False
+    order_id = insert_request_into_database(
+        username,
+        user_data.get("city_from"),
+        user_data.get("city_to"),
+        user_data.get("weight"),
+        user_data.get("send_date"),
+        user_data.get("what_is_inside"),
+        is_package
+    )
+
+    if order_id is not None:
+        # Include the order ID in the success message
+        update.message.reply_text(f"Ваша посылка 📦 №{order_id} успешно сохранена.\nОна доступна в главном меню в разделе Мои заказы")
         context.user_data['conversation'] = False
     else:
         update.message.reply_text("Ошибка при сохранении вашей посылки. Попробуйте позже.")
     return ConversationHandler.END
+

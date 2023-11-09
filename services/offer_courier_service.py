@@ -60,7 +60,7 @@ def destination_city(update, context):
     if check_city_exists(user_city):
         context.user_data['city_to'] = user_city
         context.user_data['city_to_attempts'] = 0
-        update.message.reply_text("Шаг 3/5. Сколько вы готовы примерно взять в кг:")
+        update.message.reply_text("Шаг 3/5. Какой примерно вес посылки вы готовы взять в кг?:")
         return WEIGHT2
     else:
         if attempts >= MAX_ATTEMPTS:
@@ -74,10 +74,15 @@ def destination_city(update, context):
 def weight2(update, context):
     weight_str = update.message.text
     parsed_weight = parse_weight(weight_str)
+
     if parsed_weight is not None:
-        context.user_data['weight'] = parsed_weight
-        update.message.reply_text("Шаг 4/5. Введите дату полета или поездки (дд.мм.гггг):")
-        return DATE_OF_FLIGHT
+        if parsed_weight < 100:  # Проверяем, что вес меньше 100 кг
+            context.user_data['weight'] = parsed_weight
+            update.message.reply_text("Шаг 4/5. Введите дату полета или поездки (дд.мм.гггг):")
+            return DATE_OF_FLIGHT
+        else:
+            update.message.reply_text("FlyingBox рассчитан на перевозки до 100 кг. Пожалуйста, введите новый вес.")
+            return WEIGHT2
     else:
         update.message.reply_text("Похоже, что вес введен некорректно. Пожалуйста, попробуйте еще раз.")
         return WEIGHT2
@@ -126,17 +131,21 @@ def comment(update, context):
     username = update.message.from_user.username
     is_package = False
 
-    if insert_request_into_database(
-            username,
-            user_data.get("city_from"),
-            user_data.get("city_to"),
-            user_data.get("weight"),
-            user_data.get("date_of_flight"),
-            user_data.get("comment"),
-            is_package
-    ):
+    # Capture the return value from the database insert function (should be the order ID)
+    order_id = insert_request_into_database(
+        username,
+        user_data.get("city_from"),
+        user_data.get("city_to"),
+        user_data.get("weight"),
+        user_data.get("date_of_flight"),  # Ensure that this key matches your user_data dictionary structure
+        user_data.get("comment"),
+        is_package
+    )
+
+    if order_id is not None:  # Check if order_id is returned and not None
+        # Update the message to include the order ID
         update.message.reply_text(
-            "Ваша заявка на перевозку ✈ сохранена. \nОна доступна в главном меню в разделе Мои заказы.")
+            f"Ваш заказ на перевозку ✈ №{order_id} успешно сохранен. \nОн доступен в главном меню в разделе Мои заказы.")
         context.user_data['conversation'] = False
     else:
         update.message.reply_text(

@@ -75,11 +75,11 @@ def show_city_to(update: Update, context: CallbackContext):
                 orders_to_show = orders
 
             for order in orders_to_show:
-                created_at = order[7].strftime('%d-%m-%Y')
-                send_date = order[5].strftime('%d-%m-%Y')
+                created_at = order[7].strftime('%d.%m.%Y')
+                send_date = order[5].strftime('%d.%m.%Y')
 
                 if order[9]:
-                    message_text = (f"Посылка 📦 номер {order[0]} от {created_at}\n"
+                    message_text = (f"Посылка 📦 №{order[0]} от {created_at}\n"
                                     f"Кто: @{order[1]}\n"
                                     f"Откуда: {order[2].capitalize()}\n"
                                     f"Куда: {order[3].capitalize()}\n"
@@ -87,7 +87,7 @@ def show_city_to(update: Update, context: CallbackContext):
                                     f"Желаемая дата отправки: {send_date}\n"
                                     f"Комментарий: {order[6].capitalize()}\n")
                 else:
-                    message_text = (f"Перевозка ✈️ номер {order[0]} от {created_at}\n"
+                    message_text = (f"Перевозка ✈️ №{order[0]} от {created_at}\n"
                                     f"Кто: @{order[1]}\n"
                                     f"Откуда: {order[2].capitalize()}\n"
                                     f"Куда: {order[3].capitalize()}\n"
@@ -96,6 +96,7 @@ def show_city_to(update: Update, context: CallbackContext):
                                     f"Комментарий: {order[6].capitalize()}\n")
 
                 update.message.reply_text(message_text)
+                context.user_data['conversation'] = False
 
         return ConversationHandler.END
 

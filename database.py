@@ -54,21 +54,31 @@ def insert_request_into_database(username, city_from, city_to, weight, send_date
     if conn:
         try:
             cursor = conn.cursor()
-            cursor.execute(
+            # Updated the INSERT statement to include the RETURNING clause
+            insert_query = (
                 "INSERT INTO Requests "
                 "(username, city_from, city_to, weight, send_date, what_is_inside, created_at, is_completed, is_package) "
-                "VALUES (%s, %s, %s, %s, %s, %s, NOW(), %s, %s);",
+                "VALUES (%s, %s, %s, %s, %s, %s, NOW(), %s, %s) RETURNING request_id;"
+            )
+            cursor.execute(
+                insert_query,
                 (username, city_from, city_to, weight, send_date, what_is_inside, False, is_package)
             )
+            # The RETURNING clause gives us the inserted ID
+            order_id = cursor.fetchone()[0]
             conn.commit()
+
             cursor.close()
             conn.close()
-            return True
+
+            return order_id
         except Exception as e:
-            logging.error(f"Ошибка добавления вашей заявки на отправку посылки в базу данных: {e}")
-            return False
+            logging.error(f"An error occurred while inserting your package request into the database: {e}")
+            cursor.close()
+            conn.close()
+            return None
     else:
-        return False
+        return None
 
 
 def get_orders_by_countries(country_from: str, country_to: str):
@@ -94,13 +104,25 @@ def get_user_orders_filtered(username: str):
 
 def mark_order_as_done(username: str, order_number: str) -> bool:
     conn = connect_to_database()
-    is_successful = False
     with conn.cursor() as cur:
-        cur.execute("UPDATE Requests SET is_completed = TRUE WHERE username = %s AND request_id = %s;",
+        # Check if the order is already marked as completed
+        cur.execute("SELECT is_completed FROM Requests WHERE username = %s AND request_id = %s;",
                     (username, order_number))
+        result = cur.fetchone()
+        if result and result[0]:
+            # The order is already completed, so return False
+            return False
+
+        # If not completed, update the record to mark it as completed
+        cur.execute("""
+            UPDATE Requests
+            SET is_completed = TRUE
+            WHERE username = %s AND request_id = %s AND is_completed = FALSE;
+            """, (username, order_number))
+
+        # Check if the row was updated
         if cur.rowcount > 0:
-            is_successful = True
-        conn.commit()
-        cur.close()
-    conn.close()
-    return is_successful
+            conn.commit()
+            return True
+        else:
+            return False

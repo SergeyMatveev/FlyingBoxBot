@@ -18,33 +18,23 @@ from services.send_package import send_package, CITY_FROM, CITY_TO, WEIGHT, SEND
 
 # Define the start command handler
 def start(update, context):
+    logging.info(f"User {update.message.from_user.username} entered start function.")
     username = update.message.from_user.username  # Extract the username from the incoming message
-    # Check if the user exists in the database
-    if user_exists(username):
-        # If user exists, send a welcome back message
-        update.message.reply_text(f"Привет, {username}!")
-    else:
-        # If user does not exist, try to add them to the database
-        if insert_user_into_database(username):
-            # If insertion is successful, notify the user that account creation is successful
-            update.message.reply_text("Ваш аккаунт был создан.")
-        else:
-            # If insertion fails, inform the user to contact support
-            update.message.reply_text(
-                "К сожалению, произошла ошибка при создании вашего аккаунта. Пожалуйста, напишите в поддержку.")
-    # End the conversation
+    update.message.reply_text(f"Привет, {username}!\nВыберите действие в меню.")
     return ConversationHandler.END
 
 
 # Define the cancel command handler
 def cancel(update: Update, context: CallbackContext):
+    logging.info(f"User {update.message.from_user.username} entered cancel function.")
     context.user_data.clear()  # Clear any user data that has been stored
-    update.message.reply_text('Все текущие процессы отменены.')  # Inform the user that the operation has been cancelled
+    update.message.reply_text('Действие отменено.')  # Inform the user that the operation has been cancelled
     return ConversationHandler.END  # End the conversation
 
 
 # Define the donate command handler
 def donate(update, context):
+    logging.info(f"User {update.message.from_user.username} entered donate function.")
     if 'conversation' in context.user_data and context.user_data['conversation']:
         logging.info(f"Error. User {update.message.from_user.username} tried to start new process without finishing previous.")
         update.message.reply_text(f"Вы уже находитесь в процессе создания заказа.\nЗакончите его или нажмите /cancel")
@@ -56,6 +46,7 @@ def donate(update, context):
 
 # Define the about command handler
 def about(update, context):
+    logging.info(f"User {update.message.from_user.username} entered about function.")
     if 'conversation' in context.user_data and context.user_data['conversation']:
         logging.info(f"Error. User {update.message.from_user.username} tried to start new process without finishing previous.")
         update.message.reply_text(f"Вы уже находитесь в процессе создания заказа.\nЗакончите его или нажмите /cancel")
