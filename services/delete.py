@@ -25,16 +25,24 @@ def ask_number(update, context):
 def kill_that_bitch(update, context):
     username = update.message.from_user.username
 
-    order_number = update.message.text.strip()  # Получаем номер заказа, введенный пользователем
+    # Получаем номер заказа, введенный пользователем
+    order_number = update.message.text.strip()
 
-    # Пытаемся пометить заказ как выполненный, если он существует
-    if mark_order_as_done(username, order_number):
-        update.message.reply_text(f"Шаг 2/2. Заказ номер {order_number} удален.")
-        context.user_data['conversation'] = False
-        return ConversationHandler.END
+    # Проверяем, является ли order_number целым числом
+    if order_number.isdigit():
+        order_number = int(order_number)  # Преобразуем строку в int
+
+        # Пытаемся пометить заказ как выполненный, если он существует
+        if mark_order_as_done(username, order_number):
+            update.message.reply_text(f"Шаг 2/2. Заказ номер {order_number} удален.")
+            context.user_data['conversation'] = False
+            return ConversationHandler.END
+        else:
+            update.message.reply_text("Шаг 2/2. Заказ с таким номером не найден. \nНачните процесс заново нажав /delete")
+            context.user_data['conversation'] = False
+            return ConversationHandler.END
     else:
-        update.message.reply_text(f"Шаг 2/2. Заказ с таким номером не найден."
-                                  f"Начните процесс заново нажав /delete")
+        # Сообщаем пользователю, что номер заказа должен быть целым числом
+        update.message.reply_text("Шаг 2/2. Номер заказа должен быть числом. \nНачните процесс заново нажав /delete")
         context.user_data['conversation'] = False
         return ConversationHandler.END
-
