@@ -1,11 +1,3 @@
-TOKEN = '6204132043:AAGsy6mKP485rFaBVGeeg6p1dSknDo76jlc'
-
-#production
-# DATABASE_NAME = 'flyingbox_database'
-# DATABASE_USER = 'postgres'
-# DATABASE_PASSWORD = 'flyingbox'
-# DATABASE_HOST = '34.22.206.231'
-# DATABASE_PORT = '5432'
 
 #development
 DATABASE_NAME = 'postgres'
