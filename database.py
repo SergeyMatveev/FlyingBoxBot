@@ -1,5 +1,11 @@
 import psycopg2
 import logging
+import io
+from googleapiclient.http import MediaIoBaseUpload
+import pandas as pd
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
+
 from constants import DATABASE_NAME, DATABASE_USER, DATABASE_PASSWORD, DATABASE_HOST, DATABASE_PORT
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -136,3 +142,34 @@ def get_unique_usernames():
         cur.close()
     conn.close()
     return unique_usernames
+
+
+# Функция для получения данных из таблицы и сохранения их в CSV
+def export_requests_to_csv_and_upload():
+    # Подключение к базе данных
+    conn = connect_to_database()
+    # Запрос данных из таблицы requests
+    df = pd.read_sql("SELECT * FROM requests", conn)
+    conn.close()
+
+    # Сохранение данных в CSV-файл в памяти как байтовый поток
+    csv_buffer = io.BytesIO()
+    df.to_csv(csv_buffer, index=False, encoding='utf-8')
+    csv_buffer.seek(0)
+
+    # Аутентификация в Google Drive API
+    credentials = service_account.Credentials.from_service_account_file(
+        'sergey_google_account.json',
+        scopes=['https://www.googleapis.com/auth/drive']
+    )
+    service = build('drive', 'v3', credentials=credentials)
+
+    # Загрузка файла на Google Drive
+    file_metadata = {
+        'name': 'requests.csv',
+        'mimeType': 'text/csv',
+        'parents': ['1fZDZfZK3eoTgsaRIuo-D889rcJbGM2QG']
+    }
+    media = MediaIoBaseUpload(csv_buffer, mimetype='text/csv', resumable=True)
+    service.files().create(body=file_metadata, media_body=media, fields='id').execute()
+    return True

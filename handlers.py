@@ -2,7 +2,7 @@ import logging
 
 from telegram.ext import CommandHandler, ConversationHandler, CallbackContext, MessageHandler, \
     Filters
-from database import user_exists, insert_user_into_database, get_unique_usernames
+from database import user_exists, insert_user_into_database, get_unique_usernames, export_requests_to_csv_and_upload
 from telegram import Update
 
 from services.delete import ASK_NUMBER, KILL_THAT_BITCH, ask_number, kill_that_bitch
@@ -56,6 +56,21 @@ def users_count(update, context):
     for user in users:
         update.message.reply_text(f'{user}')
     return ConversationHandler.END  # End the conversation
+
+
+def refresh_db_backup(update, context):
+    logging.info(f"User {update.message.from_user.username} entered refresh_db_backup function.")
+    if 'conversation' in context.user_data and context.user_data['conversation']:
+        logging.info(f"Error. User {update.message.from_user.username} tried to start new process without finishing previous.")
+        update.message.reply_text(f"Вы уже находитесь в процессе создания заказа.\nЗакончите его или нажмите /cancel")
+        return ConversationHandler.END
+    # Send a message with the payment card information for donations
+    if export_requests_to_csv_and_upload():
+        update.message.reply_text(f"Обновились данные. Проверьте гугл драйв.")
+        return ConversationHandler.END  # End the conversation
+    else:
+        update.message.reply_text(f"Что-то наебнулось.")
+        return ConversationHandler.END  # End the conversation
 
 
 # Define the about command handler
@@ -142,3 +157,4 @@ def setup_handlers(updater):
     dp.add_handler(CommandHandler('start', start))
     dp.add_handler(CommandHandler('about', about))
     dp.add_handler(CommandHandler('users_count', users_count))
+    dp.add_handler(CommandHandler('refresh_db_backup', refresh_db_backup))
