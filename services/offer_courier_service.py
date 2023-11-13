@@ -35,6 +35,11 @@ def offer_courier_service(update, context):
 
 def origin_city(update, context):
     user_city = update.message.text.lower()
+
+    if len(user_city) >= 50:
+        update.message.reply_text("Сообщение длиннее 50 символов. Введите заново:\nДля отмены нажмите /cancel")
+        return ORIGIN_CITY
+
     attempts = context.user_data.get('city_from_attempts', 0) + 1
     context.user_data['city_from_attempts'] = attempts
 
@@ -54,6 +59,11 @@ def origin_city(update, context):
 
 def destination_city(update, context):
     user_city = update.message.text.lower()
+
+    if len(user_city) >= 50:
+        update.message.reply_text("Сообщение длиннее 50 символов. Введите заново:\nДля отмены нажмите /cancel")
+        return DESTINATION_CITY
+
     attempts = context.user_data.get('city_to_attempts', 0) + 1
     context.user_data['city_to_attempts'] = attempts
 
@@ -73,6 +83,11 @@ def destination_city(update, context):
 
 def weight2(update, context):
     weight_str = update.message.text
+
+    if len(weight_str) >= 50:
+        update.message.reply_text("Сообщение длиннее 50 символов. Введите заново:\nДля отмены нажмите /cancel")
+        return WEIGHT2
+
     parsed_weight = parse_weight(weight_str)
 
     if parsed_weight is not None:
@@ -90,6 +105,11 @@ def weight2(update, context):
 
 def date_of_flight(update, context):
     user_input = update.message.text
+
+    if len(user_input) >= 50:
+        update.message.reply_text("Сообщение длиннее 50 символов. Введите заново:\nДля отмены нажмите /cancel")
+        return DATE_OF_FLIGHT
+
     # Заменяем некоторые разделители на стандартный
     user_input = user_input.replace(".", "-").replace("/", "-").replace(",", "-")
     try:
@@ -127,6 +147,11 @@ def date_of_flight(update, context):
 
 def comment(update, context):
     context.user_data["comment"] = update.message.text
+
+    if len(context.user_data["comment"]) >= 250:
+        update.message.reply_text("Сообщение длиннее 250 символов. Введите заново:\nДля отмены нажмите /cancel")
+        return COMMENT
+
     user_data = context.user_data
     username = update.message.from_user.username
     is_package = False

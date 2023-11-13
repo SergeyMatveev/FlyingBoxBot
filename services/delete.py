@@ -28,6 +28,10 @@ def kill_that_bitch(update, context):
     # Получаем номер заказа, введенный пользователем
     order_number = update.message.text.strip()
 
+    if len(order_number) >= 50:
+        update.message.reply_text("Сообщение длиннее 50 символов. Введите заново:\nДля отмены нажмите /cancel")
+        return KILL_THAT_BITCH
+
     # Проверяем, является ли order_number целым числом
     if order_number.isdigit():
         order_number = int(order_number)  # Преобразуем строку в int

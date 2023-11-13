@@ -126,3 +126,13 @@ def mark_order_as_done(username: str, order_number: str) -> bool:
             return True
         else:
             return False
+
+
+def get_unique_usernames():
+    conn = connect_to_database()
+    with conn.cursor() as cur:
+        cur.execute("SELECT DISTINCT username FROM Requests;")
+        unique_usernames = cur.fetchall()
+        cur.close()
+    conn.close()
+    return unique_usernames

@@ -3,7 +3,7 @@ import logging
 from telegram import Update
 from telegram.ext import CallbackContext, ConversationHandler
 
-SUPPORT = range(1)
+FORWARD_TO_GROUP = range(1)
 
 GROUP_CHAT_ID = '-1001837659021'
 
@@ -17,11 +17,16 @@ def ask_for_issue(update: Update, context: CallbackContext):
     context.user_data['conversation'] = True
     """Обработчик кнопки помощь."""
     update.message.reply_text("Напишите, что пошло не так:")
-    return SUPPORT
+    return FORWARD_TO_GROUP
 
 
 def forward_to_group(update: Update, context: CallbackContext):
     context.user_data['support'] = update.message.text
+
+    if len(context.user_data['support']) >= 50:
+        update.message.reply_text("Сообщение длиннее 50 символов. Введите заново:\nДля отмены нажмите /cancel")
+        return FORWARD_TO_GROUP
+
     user_message = update.message.text
     user_username = update.message.from_user.username
     context.bot.send_message(GROUP_CHAT_ID, f"Сообщение от пользователя @{user_username}: {user_message}")

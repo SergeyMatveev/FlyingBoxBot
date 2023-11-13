@@ -25,6 +25,11 @@ def show_all_orders(update: Update, context: CallbackContext):
 
 def show_city_from(update: Update, context: CallbackContext):
     print_user_city = update.message.text
+
+    if len(print_user_city) >= 50:
+        update.message.reply_text("Сообщение длиннее 50 символов. Введите заново:\nДля отмены нажмите /cancel")
+        return SHOW_CITY_FROM
+
     user_city = update.message.text.lower()
     logging.info(f"Received user city: {user_city}")
 
@@ -96,8 +101,9 @@ def show_city_to(update: Update, context: CallbackContext):
                                     f"Комментарий: {order[6].capitalize()}\n")
 
                 update.message.reply_text(message_text)
-                context.user_data['conversation'] = False
 
+        context.user_data['conversation'] = False
+        update.message.reply_text('Для продолжения работы перейдите в меню.')
         return ConversationHandler.END
 
     # Проверка количества попыток

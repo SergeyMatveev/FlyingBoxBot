@@ -63,8 +63,12 @@ def send_package(update, context):
 
 
 def city_from(update, context):
-
     user_city = update.message.text.lower()
+
+    if len(user_city) >= 50:
+        update.message.reply_text("Сообщение длиннее 50 символов. Введите заново:\nДля отмены нажмите /cancel")
+        return CITY_FROM
+
     attempts = context.user_data.get('city_from_attempts', 0) + 1
     context.user_data['city_from_attempts'] = attempts
 
@@ -78,7 +82,7 @@ def city_from(update, context):
             update.message.reply_text("Вы ввели город неправильно 5 раз. Попробуйте оформить заявку снова.")
             return ConversationHandler.END
         else:
-            update.message.reply_text("Я не знаю такого города, попробуйте ввести по-другому.")
+            update.message.reply_text("Я не знаю такого города, попробуйте ввести по-другому.\nДля отмены нажмите /cancel")
             return CITY_FROM
 
 
@@ -86,6 +90,10 @@ def city_to(update, context):
     user_city = update.message.text.lower()
     attempts = context.user_data.get('city_to_attempts', 0) + 1
     context.user_data['city_to_attempts'] = attempts
+
+    if len(user_city) >= 50:
+        update.message.reply_text("Сообщение длиннее 50 символов. Введите заново:\nДля отмены нажмите /cancel")
+        return CITY_TO
 
     if check_city_exists(user_city):
         context.user_data['city_to'] = user_city
@@ -103,6 +111,11 @@ def city_to(update, context):
 
 def weight(update, context):
     weight_str = update.message.text
+
+    if len(weight_str) >= 50:
+        update.message.reply_text("Сообщение длиннее 50 символов. Введите заново:\nДля отмены нажмите /cancel")
+        return WEIGHT
+
     parsed_weight = parse_weight(weight_str)
     if parsed_weight is not None:
         if parsed_weight > 100:
@@ -119,6 +132,11 @@ def weight(update, context):
 
 def send_date(update, context):
     user_input = update.message.text
+
+    if len(user_input) >= 50:
+        update.message.reply_text("Сообщение длиннее 50 символов. Введите заново:\nДля отмены нажмите /cancel")
+        return SEND_DATE
+
     # Заменяем некоторые разделители на стандартный
     user_input = user_input.replace(".", "-").replace("/", "-").replace(",", "-")
 
@@ -130,12 +148,12 @@ def send_date(update, context):
         nine_months_from_now = today + relativedelta(months=+9)  # Дата через 9 месяцев от сегодня
 
         if parsed_date <= today:
-            update.message.reply_text("Вы ввели дату в прошлом. Пожалуйста, введите дату в будущем.")
+            update.message.reply_text("Вы ввели дату в прошлом. Пожалуйста, введите дату в будущем.\nДля отмены нажмите /cancel")
             return SEND_DATE
 
         if parsed_date > nine_months_from_now:
             update.message.reply_text(
-                "По вашей дате отправления совпадений не будет найдено, введите дату в пределах 9 месяцев от сегодняшнего дня.")
+                "По вашей дате отправления совпадений не будет найдено, введите дату в пределах 9 месяцев от сегодняшнего дня.\nДля отмены нажмите /cancel")
             return SEND_DATE
 
         context.user_data['send_date'] = formatted_date
@@ -157,6 +175,11 @@ def send_date(update, context):
 
 def what_is_inside(update, context):
     context.user_data['what_is_inside'] = update.message.text
+
+    if len(context.user_data['what_is_inside']) >= 250:
+        update.message.reply_text("Сообщение длиннее 250 символов. Введите заново:\nДля отмены нажмите /cancel")
+        return WHAT_IS_INSIDE
+
     user_data = context.user_data
     is_package = True
     username = update.message.from_user.username
