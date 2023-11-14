@@ -1,4 +1,4 @@
-TOKEN = '6204132043:AAGsy6mKP485rFaBVGeeg6p1dSknDo76jlc'
+
 
 DATABASE_NAME = 'postgres'
 DATABASE_USER = 'postgres'
