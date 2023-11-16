@@ -20,7 +20,12 @@ from services.send_package import send_package, CITY_FROM, CITY_TO, WEIGHT, SEND
 def start(update, context):
     logging.info(f"User {update.message.from_user.username} entered start function.")
     username = update.message.from_user.username  # Extract the username from the incoming message
-    update.message.reply_text(f"Привет, {username}!\nВыберите действие в меню.")
+    update.message.reply_text(f"Здравствуйте! Вы успешно зарегистрировались во Flyingbox боте. Мы надеемся, что наш бот будет полезен, а отправка мелких грузов станет проще. "
+                              f"\n\nПодписывайтесь на наш канал @flyingbox! Там вы сможете прочитать и найти:"
+                              f"\n- подробную инструкцию по использованию бота,"
+                              f"\n- полезную информацию о перевозках,"
+                              f"\n- сможете задать вопрос о работе бота."
+                              f"\n@flyingbox")
     return ConversationHandler.END
 
 
@@ -40,7 +45,10 @@ def donate(update, context):
         update.message.reply_text(f"Вы уже находитесь в процессе создания заказа.\nЗакончите его или нажмите /cancel")
         return ConversationHandler.END
     # Send a message with the payment card information for donations
-    update.message.reply_text('Карта 5312 8777 8777 8777 для Константина Маркелова.')
+    update.message.reply_text(f'Если вам понравился бот, вы можете помочь развивать его сделав перевод по номеру карты Тинькофф 5280 4137 5265 2326 \n\nЗаранее спасибо :)')
+
+
+
     return ConversationHandler.END  # End the conversation
 
 
@@ -82,7 +90,7 @@ def about(update, context):
         return ConversationHandler.END
     # Send a message describing who created the bot and its purpose
     update.message.reply_text(
-        'Константин Маркелов и Сергей Матвеев сделали для вас этот прекрасный инструмент для поиска попутчика для отправки посылки.\n\nЕсли у вас есть деньги, поделитесь с нами, пожалуйста.')
+        'Мы - команда молодого чат-бота @flying_box_bot \nРешили сделать этот мир чуточку лучше. Мы лично столкнулись с задачей передачи мелких пакетов и грузов из/в РФ и придумали вот такого бота в помощь всем. \nБот полностью бесплатный, но если он принес вам пользу и понравился - будем рады вашим донатам. \n\nСпасибо :).')
     return ConversationHandler.END  # End the conversation
 
 
