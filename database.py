@@ -61,7 +61,7 @@ def save_order_in_database(username, departure_city, destination_city, weight, d
 def get_active_orders(username: str):
     conn = connect_to_database()
     if conn is None:
-        logging.error(f"An error occurred while connecting to database: {e}")
+        logging.error(f"An error occurred while connecting to database")
         # Обработайте ситуацию, когда соединение не установлено
         return None
     with conn.cursor() as cur:
