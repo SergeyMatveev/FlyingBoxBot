@@ -1,7 +1,18 @@
 #!/usr/bin/env python3
 import logging
-from datetime import datetime
 import psycopg2
+from datetime import datetime
+
+# Настройка логирования
+log_filename = 'flyingbox_update_old_orders.log'
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler(log_filename),
+        logging.StreamHandler()  # Также выводим логи в стандартный вывод
+    ]
+)
 
 DATABASE_NAME = 'postgres'
 DATABASE_USER = 'postgres'
