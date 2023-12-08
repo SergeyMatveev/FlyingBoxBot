@@ -31,11 +31,11 @@ def prepare_matching(update: Update, context: CallbackContext):
     if num_orders == 1:
         last_order = orders[0]
         context.user_data['order_id'] = last_order[0]
-        update.message.reply_text(f"Запускаем метчинг по заказу №{last_order[0]},"
+        update.message.reply_text(f"Запускаем метчинг по заказу №{last_order[0]},\n"
                                   f"Откуда: {last_order[2].capitalize()}\n"
                                   f"Куда: {last_order[3].capitalize()}\n"
                                   )
-        return MATCHING
+        return matching(update, context)
     elif num_orders > 1:
         update.message.reply_text(f"У вас несколько заказов:")
         for order in orders:
@@ -119,7 +119,7 @@ def send_notification(update, context, orders_to_notify):
             chat_id = cursor.fetchone()[0]
 
             if chat_id:
-                message = f"Найдено совпадение по вашему маршруту. \nСвяжитесь с @{order[1]}.\nВот детали его заказа."
+                message = f"Найдено совпадение по вашему маршруту. \nСвяжитесь с @{order[1]}.\nВот детали заказа."
                 bot.send_message(chat_id, message)
                 created_at = order[7].strftime('%d.%m.%Y')
                 send_date = order[5].strftime('%d.%m.%Y')
