@@ -5,6 +5,7 @@ from googleapiclient.http import MediaIoBaseUpload
 import pandas as pd
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
+from datetime import datetime
 
 from constants import DATABASE_NAME, DATABASE_USER, DATABASE_PASSWORD, DATABASE_HOST, DATABASE_PORT, MAX_DATE_DIFF
 
@@ -62,7 +63,6 @@ def get_active_orders(username: str):
     conn = connect_to_database()
     if conn is None:
         logging.error(f"An error occurred while connecting to database")
-        # Обработайте ситуацию, когда соединение не установлено
         return None
     with conn.cursor() as cur:
         cur.execute("SELECT * FROM orders WHERE username = %s AND is_completed = FALSE;", (username,))
@@ -200,3 +200,35 @@ def find_matches(order_id):
                     MAX_DATE_DIFF))
                 matches = cur.fetchall()
         return matches
+
+
+def update_completed_orders():
+    """
+    Обновление статуса is_completed в заказах, где текущая дата больше, чем departure_date.
+    """
+    try:
+        with connect_to_database() as conn:
+            with conn.cursor() as cur:
+                # Получаем текущую дату
+                current_date = datetime.now().date()
+
+                # SQL-запрос для обновления статуса
+                update_query = """
+                UPDATE orders
+                SET is_completed = TRUE
+                WHERE departure_date < %s AND is_completed = FALSE
+                """
+
+                # Выполнение запроса
+                cur.execute(update_query, (current_date,))
+
+                # Фиксируем изменения в базе данных
+                conn.commit()
+
+                # Возвращаем количество обновленных записей
+                logging.info(f"Orders were updated because departure_date < current_date. Amount of rows affected: {cur.rowcount}")
+                return cur.rowcount
+
+    except Exception as e:
+        logging.error(f"Error updating orders: {e}")
+        return None
