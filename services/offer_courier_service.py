@@ -5,7 +5,8 @@ from dateutil.relativedelta import relativedelta
 from telegram.ext import ConversationHandler
 
 from constants import MAX_ATTEMPTS
-from database import insert_request_into_database
+from database import save_order_in_database
+from services.matching import prepare_matching
 from services.send_package import check_city_exists, parse_weight
 
 ORIGIN_CITY, DESTINATION_CITY, WEIGHT2, DATE_OF_FLIGHT, COMMENT = range(5)
@@ -155,22 +156,26 @@ def comment(update, context):
     user_data = context.user_data
     username = update.message.from_user.username
     is_package = False
+    chat_id = update.message.chat_id
 
     # Capture the return value from the database insert function (should be the order ID)
-    order_id = insert_request_into_database(
+    order_id = save_order_in_database(
         username,
         user_data.get("city_from"),
         user_data.get("city_to"),
         user_data.get("weight"),
         user_data.get("date_of_flight"),  # Ensure that this key matches your user_data dictionary structure
         user_data.get("comment"),
-        is_package
+        is_package,
+        chat_id
     )
 
-    if order_id is not None:  # Check if order_id is returned and not None
-        # Update the message to include the order ID
-        update.message.reply_text(
-            f"Ваш заказ на перевозку ✈ №{order_id} успешно сохранен. \nОн доступен в главном меню в разделе Мои заказы.")
+    if order_id is not None:
+        update.message.reply_text(f"✈ Ваша перевозка №{order_id} успешно сохранена.\nОна доступна в главном меню в разделе Мои заказы.")
+        update.message.reply_text("Сразу ищем подходящие заказы...")
+        context.user_data['order_id'] = order_id
+        context.user_data['cascade'] = True
+        prepare_matching(update, context)
         context.user_data['conversation'] = False
     else:
         update.message.reply_text(

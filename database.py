@@ -6,7 +6,7 @@ import pandas as pd
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 
-from constants import DATABASE_NAME, DATABASE_USER, DATABASE_PASSWORD, DATABASE_HOST, DATABASE_PORT
+from constants import DATABASE_NAME, DATABASE_USER, DATABASE_PASSWORD, DATABASE_HOST, DATABASE_PORT, MAX_DATE_DIFF
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -26,49 +26,20 @@ def connect_to_database():
         return None
 
 
-def user_exists(username):
-    try:
-        with connect_to_database() as conn:
-            with conn.cursor() as cursor:
-                cursor.execute("SELECT EXISTS (SELECT 1 FROM Users WHERE username = %s);", (username,))
-                result = cursor.fetchone()
-                return result[0]
-    except Exception as e:
-        logging.error(f"Ошибка проверки пользователя в базе данных: {e}")
-        return False
-
-
-def insert_user_into_database(username):
-    conn = connect_to_database()
-    if conn:
-        try:
-            cursor = conn.cursor()
-            cursor.execute("INSERT INTO Users (username, created_at) VALUES (%s, NOW());", (username,))
-            conn.commit()
-            cursor.close()
-            conn.close()
-            return True
-        except Exception as e:
-            logging.error(f"Ошибка добавления вашей учетной записи в базу данных: {e}")
-            return False
-    else:
-        return False
-
-
-def insert_request_into_database(username, city_from, city_to, weight, send_date, what_is_inside, is_package):
+def save_order_in_database(username, departure_city, destination_city, weight, departure_date, user_comment, is_package, chat_id):
     conn = connect_to_database()
     if conn:
         try:
             cursor = conn.cursor()
             # Updated the INSERT statement to include the RETURNING clause
             insert_query = (
-                "INSERT INTO Requests "
-                "(username, city_from, city_to, weight, send_date, what_is_inside, created_at, is_completed, is_package) "
-                "VALUES (%s, %s, %s, %s, %s, %s, NOW(), %s, %s) RETURNING request_id;"
+                "INSERT INTO orders "
+                "(username, departure_city, destination_city, weight, departure_date, user_comment, is_package, chat_id) "
+                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING order_id;"
             )
             cursor.execute(
                 insert_query,
-                (username, city_from, city_to, weight, send_date, what_is_inside, False, is_package)
+                (username, departure_city, destination_city, weight, departure_date, user_comment, is_package, chat_id)
             )
             # The RETURNING clause gives us the inserted ID
             order_id = cursor.fetchone()[0]
@@ -87,32 +58,21 @@ def insert_request_into_database(username, city_from, city_to, weight, send_date
         return None
 
 
-def get_orders_by_countries(country_from: str, country_to: str):
-    conn = connect_to_database()
-    orders = []
-    with conn.cursor() as cur:
-        query = """SELECT * FROM Requests WHERE city_from = %s AND city_to = %s AND is_completed = FALSE;"""
-        cur.execute(query, (country_from, country_to))
-        orders = cur.fetchall()
-    conn.close()
-    return orders
-
-
-def get_user_orders_filtered(username: str):
+def get_active_orders(username: str):
     conn = connect_to_database()
     with conn.cursor() as cur:
-        cur.execute("SELECT * FROM Requests WHERE username = %s AND is_completed = FALSE;", (username,))
+        cur.execute("SELECT * FROM orders WHERE username = %s AND is_completed = FALSE;", (username,))
         orders = cur.fetchall()
         cur.close()
     conn.close()
     return orders
 
 
-def mark_order_as_done(username: str, order_number: str) -> bool:
+def mark_order_as_completed(username: str, order_number: str) -> bool:
     conn = connect_to_database()
     with conn.cursor() as cur:
         # Check if the order is already marked as completed
-        cur.execute("SELECT is_completed FROM Requests WHERE username = %s AND request_id = %s;",
+        cur.execute("SELECT is_completed FROM orders WHERE username = %s AND order_id = %s;",
                     (username, order_number))
         result = cur.fetchone()
         if result and result[0]:
@@ -121,9 +81,9 @@ def mark_order_as_done(username: str, order_number: str) -> bool:
 
         # If not completed, update the record to mark it as completed
         cur.execute("""
-            UPDATE Requests
+            UPDATE orders
             SET is_completed = TRUE
-            WHERE username = %s AND request_id = %s AND is_completed = FALSE;
+            WHERE username = %s AND order_id = %s AND is_completed = FALSE;
             """, (username, order_number))
 
         # Check if the row was updated
@@ -137,19 +97,18 @@ def mark_order_as_done(username: str, order_number: str) -> bool:
 def get_unique_usernames():
     conn = connect_to_database()
     with conn.cursor() as cur:
-        cur.execute("SELECT DISTINCT username FROM Requests;")
+        cur.execute("SELECT DISTINCT username FROM orders;")
         unique_usernames = cur.fetchall()
         cur.close()
     conn.close()
     return unique_usernames
 
 
-# Функция для получения данных из таблицы и сохранения их в CSV
 def export_requests_to_csv_and_upload():
     # Подключение к базе данных
     conn = connect_to_database()
     # Запрос данных из таблицы requests
-    df = pd.read_sql("SELECT * FROM requests", conn)
+    df = pd.read_sql("SELECT * FROM orders", conn)
     conn.close()
 
     # Сохранение данных в CSV-файл в памяти как байтовый поток
@@ -166,10 +125,74 @@ def export_requests_to_csv_and_upload():
 
     # Загрузка файла на Google Drive
     file_metadata = {
-        'name': 'requests.csv',
+        'name': 'orders.csv',
         'mimeType': 'text/csv',
         'parents': ['1fZDZfZK3eoTgsaRIuo-D889rcJbGM2QG']
     }
     media = MediaIoBaseUpload(csv_buffer, mimetype='text/csv', resumable=True)
     service.files().create(body=file_metadata, media_body=media, fields='id').execute()
     return True
+
+
+def get_order_data(order_id):
+    """
+    Получение данных заявки по ее ID.
+    """
+    try:
+        with connect_to_database() as conn:
+            with conn.cursor() as cur:
+                query = "SELECT * FROM orders WHERE order_id = %s AND is_completed = FALSE"
+                cur.execute(query, (order_id,))
+                order_data = cur.fetchone()
+                return order_data
+    except Exception as e:
+        logging.error(f"Error getting data: {e}")
+        return None
+
+
+def find_matches(order_id):
+    """
+    Поиск совпадающих заявок в базе данных.
+    max_date_diff: Максимальная разница в датах (в днях).
+    """
+
+    order_data = get_order_data(order_id)
+    if order_data is None:
+        logging.info(f"Function find_matches returned False")
+        return None  # Если заявка с таким ID не найдена
+
+    order_id, username, departure_city, destination_city, weight, departure_date, user_comment, created_at, is_completed, is_package, chat_id = order_data
+
+    if is_package:
+        with connect_to_database() as conn:
+            with conn.cursor() as cur:
+                query = """
+                SELECT * FROM orders
+                WHERE departure_city = %s
+                AND destination_city = %s
+                AND is_package = False
+                AND is_completed = False
+                AND departure_date BETWEEN %s - INTERVAL '%s days' AND %s + INTERVAL '%s days'
+                """
+                cur.execute(query, (
+                    departure_city, destination_city, departure_date, MAX_DATE_DIFF, departure_date,
+                    MAX_DATE_DIFF))
+                matches = cur.fetchall()
+        return matches
+
+    else:
+        with connect_to_database() as conn:
+            with conn.cursor() as cur:
+                query = """
+                SELECT * FROM orders
+                WHERE departure_city = %s
+                AND destination_city = %s
+                AND is_package = True
+                AND is_completed = False
+                AND departure_date BETWEEN %s - INTERVAL '%s days' AND %s + INTERVAL '%s days'
+                """
+                cur.execute(query, (
+                    departure_city, destination_city, departure_date, MAX_DATE_DIFF, departure_date,
+                    MAX_DATE_DIFF))
+                matches = cur.fetchall()
+        return matches

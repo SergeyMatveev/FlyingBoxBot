@@ -2,7 +2,6 @@ import logging
 from telegram import Update
 from telegram.ext import CallbackContext, ConversationHandler
 from constants import MAX_ATTEMPTS
-from database import get_orders_by_countries
 from services.send_package import check_city_exists
 
 SHOW_CITY_FROM, SHOW_CITY_TO = range(2)
@@ -84,7 +83,7 @@ def show_city_to(update: Update, context: CallbackContext):
                 send_date = order[5].strftime('%d.%m.%Y')
 
                 if order[9]:
-                    message_text = (f"Посылка 📦 №{order[0]} от {created_at}\n"
+                    message_text = (f"📦 Посылка №{order[0]} от {created_at}\n"
                                     f"Кто: @{order[1]}\n"
                                     f"Откуда: {order[2].capitalize()}\n"
                                     f"Куда: {order[3].capitalize()}\n"
@@ -92,7 +91,7 @@ def show_city_to(update: Update, context: CallbackContext):
                                     f"Желаемая дата отправки: {send_date}\n"
                                     f"Комментарий: {order[6].capitalize()}\n")
                 else:
-                    message_text = (f"Перевозка ✈️ №{order[0]} от {created_at}\n"
+                    message_text = (f"✈️ Перевозка №{order[0]} от {created_at}\n"
                                     f"Кто: @{order[1]}\n"
                                     f"Откуда: {order[2].capitalize()}\n"
                                     f"Куда: {order[3].capitalize()}\n"

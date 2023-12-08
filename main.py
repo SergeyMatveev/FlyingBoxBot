@@ -5,12 +5,11 @@ from handlers import setup_handlers
 from constants import TOKEN
 
 # Настройка логирования
-logging.basicConfig(level=logging.INFO)  # Или выберите другой уровень логирования, например DEBUG
+logging.basicConfig(level=logging.INFO)
 syslog = SysLogHandler()
-syslog.setLevel(logging.INFO)  # Или другой уровень, соответствующий вашим потребностям
+syslog.setLevel(logging.INFO)
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 syslog.setFormatter(formatter)
-# Получение корневого логгера и добавление обработчика SysLog
 root_logger = logging.getLogger()
 root_logger.addHandler(syslog)
 

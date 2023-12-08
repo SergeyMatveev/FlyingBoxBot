@@ -2,7 +2,7 @@ import logging
 
 from telegram.ext import ConversationHandler
 
-from database import mark_order_as_done
+from database import mark_order_as_completed
 
 ASK_NUMBER, KILL_THAT_BITCH = range(2)
 
@@ -37,7 +37,7 @@ def kill_that_bitch(update, context):
         order_number = int(order_number)  # Преобразуем строку в int
 
         # Пытаемся пометить заказ как выполненный, если он существует
-        if mark_order_as_done(username, order_number):
+        if mark_order_as_completed(username, order_number):
             update.message.reply_text(f"Шаг 2/2. Заказ номер {order_number} удален.")
             context.user_data['conversation'] = False
             return ConversationHandler.END

@@ -1,7 +1,7 @@
 import logging
 from telegram import Update
 from telegram.ext import CallbackContext, ConversationHandler
-from database import get_user_orders_filtered
+from database import get_active_orders
 
 SELECT_ORDER = 0
 
@@ -16,10 +16,11 @@ def my_orders(update: Update, context: CallbackContext) -> int:
     context.user_data['conversation'] = True
 
     username = update.message.from_user.username
-    orders = get_user_orders_filtered(username)
+    orders = get_active_orders(username)
 
     if not orders:
-        update.message.reply_text("У вас нет заказов.")
+        update.message.reply_text("У вас нет активных заказов. Опубликуйте посылку или перевозку в меню.")
+        context.user_data['conversation'] = False
         return ConversationHandler.END
     else:
         for order in orders:
@@ -28,14 +29,14 @@ def my_orders(update: Update, context: CallbackContext) -> int:
 
             # Добавляем условный оператор для order[11] - индикатор посылка или перевозка
             if order[9]:
-                message_text = (f"Ваша посылка 📦 №{order[0]} от {created_at}\n"
+                message_text = (f"📦 Ваша посылка №{order[0]} от {created_at}\n"
                                 f"Откуда: {order[2].capitalize()}\n"
                                 f"Куда: {order[3].capitalize()}\n"
                                 f"Вес: {float(order[4])} кг\n"
                                 f"Желаемая дата отправки: {send_date}\n"
                                 f"Комментарий: {order[6].capitalize()}\n")
             else:
-                message_text = (f"Ваша перевозка ✈️ №{order[0]} от {created_at}\n"
+                message_text = (f"✈️ Ваша перевозка №{order[0]} от {created_at}\n"
                                 f"Откуда: {order[2].capitalize()}\n"
                                 f"Куда: {order[3].capitalize()}\n"
                                 f"Готовы взять: {float(order[4])} кг\n"
