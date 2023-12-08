@@ -60,10 +60,14 @@ def save_order_in_database(username, departure_city, destination_city, weight, d
 
 def get_active_orders(username: str):
     conn = connect_to_database()
+    if conn is None:
+        logging.error(f"An error occurred while connecting to database: {e}")
+        # Обработайте ситуацию, когда соединение не установлено
+        return None
     with conn.cursor() as cur:
         cur.execute("SELECT * FROM orders WHERE username = %s AND is_completed = FALSE;", (username,))
         orders = cur.fetchall()
-        cur.close()
+        # Нет необходимости в явном вызове cur.close(), так как контекстный менеджер это сделает автоматически
     conn.close()
     return orders
 
