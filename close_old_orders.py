@@ -50,7 +50,7 @@ def update_completed_orders():
 
                 # Возвращаем количество обновленных записей
                 logging.info(
-                    f"Orders were updated because departure_date < current_date. Amount of rows affected: {cur.rowcount}")
+                    f"Orders were updated if departure_date < current_date (it is {current_date}). Amount of rows affected: {cur.rowcount}")
                 return cur.rowcount
 
     except Exception as e:
