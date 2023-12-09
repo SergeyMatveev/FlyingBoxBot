@@ -1,7 +1,7 @@
-This is a FlyingBoxBot
-It is a digital platfor that connects senders and couriers.
+FlyingBoxBot is a digital platform that connects senders and couriers.
 
-We have a table orders	
+We have a table 
+orders	
 order_id	INT, SERIAL
 username	VARCHAR(255), NOT NULL
 departure_city	VARCHAR(255), NOT NULL
