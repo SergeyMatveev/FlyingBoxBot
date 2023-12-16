@@ -199,7 +199,7 @@ def what_is_inside(update, context):
     if order_id is not None:
         # Include the order ID in the success message
         update.message.reply_text(f"📦 Ваша посылка №{order_id} успешно сохранена.\nОна доступна в главном меню в разделе Мои заказы.")
-        update.message.reply_text("Сразу ищем подходящие заказы...")
+        update.message.reply_text("Пробуем найти подходящих перевозчиков...")
         context.user_data['order_id'] = order_id
         context.user_data['cascade'] = True
         prepare_matching(update, context)

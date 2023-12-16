@@ -31,7 +31,7 @@ def prepare_matching(update: Update, context: CallbackContext):
     if num_orders == 1:
         last_order = orders[0]
         context.user_data['order_id'] = last_order[0]
-        update.message.reply_text(f"Запускаем метчинг по заказу №{last_order[0]},\n"
+        update.message.reply_text(f"Запускаем поиск совпадений по заказу №{last_order[0]},\n"
                                   f"Откуда: {last_order[2].capitalize()}\n"
                                   f"Куда: {last_order[3].capitalize()}\n"
                                   )
@@ -44,7 +44,7 @@ def prepare_matching(update: Update, context: CallbackContext):
                                       f"Откуда: {order[2].capitalize()}\n"
                                       f"Куда: {order[3].capitalize()}\n"
                                       )
-        update.message.reply_text("Введите номер заказа для метчинга:")
+        update.message.reply_text("Введите номер заказа для поиска совпадений:")
         return MATCHING
     else:
         update.message.reply_text("У вас нет активных заказов. Опубликуйте посылку или перевозку в меню.")
@@ -63,7 +63,7 @@ def matching(update: Update, context: CallbackContext):
         update.message.reply_text('Произошла ошибка при поиске совпадений.')
     elif not matches:
         # Обработка случая, когда совпадений нет
-        update.message.reply_text('К сожалению, сейчас совпадений для этого маршрута не найдено.\nКак только появится подходящий заказ мы сразу вам напишем.')
+        update.message.reply_text('На данный момент совпадений для этого маршрута не найдено.\nКак только появится подходящий курьер, Вам сразу придет сообщение.')
 
     else:
         if len(matches) > 5:

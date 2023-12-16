@@ -172,7 +172,7 @@ def comment(update, context):
 
     if order_id is not None:
         update.message.reply_text(f"✈ Ваша перевозка №{order_id} успешно сохранена.\nОна доступна в главном меню в разделе Мои заказы.")
-        update.message.reply_text("Сразу ищем подходящие заказы...")
+        update.message.reply_text("Пробуем найти подходящие посылки...")
         context.user_data['order_id'] = order_id
         context.user_data['cascade'] = True
         prepare_matching(update, context)
