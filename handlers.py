@@ -9,7 +9,6 @@ from telegram import Update
 from services.delete import ASK_NUMBER, KILL_THAT_BITCH, ask_number, kill_that_bitch
 from services.matching import matching, MATCHING, prepare_matching, PREPARE_MATCHING
 from services.my_orders import my_orders
-from services.show_all_orders import show_all_orders, show_city_from, show_city_to, SHOW_CITY_FROM, SHOW_CITY_TO
 from services.offer_courier_service import origin_city, destination_city, comment, ORIGIN_CITY, DESTINATION_CITY, \
     COMMENT, DATE_OF_FLIGHT, \
     date_of_flight, offer_courier_service, weight2, WEIGHT2
@@ -39,38 +38,6 @@ def cancel(update: Update, context: CallbackContext):
     return ConversationHandler.END  # End the conversation
 
 
-# CD = create default order
-def cd(update: Update, context: CallbackContext):
-    logging.info(f"User {update.message.from_user.username} entered create default order function.")
-    user_data = context.user_data
-    is_package = True
-    username = update.message.from_user.username
-    chat_id = update.message.chat_id
-
-    # insert_request_into_database now returns the order ID instead of True/False
-    order_id = save_order_in_database(
-        username,
-        'осло',
-        'осло',
-        11,
-        '2023-12-11',
-        'тест',
-        is_package,
-        chat_id
-    )
-    if order_id is not None:
-        # Include the order ID in the success message
-        update.message.reply_text(
-            f"Посылка 📦 №{order_id} успешно сохранена.")
-        update.message.reply_text("Сейчас будет показаны подходящие заказы.")
-        context.user_data['request_id'] = order_id
-        context.user_data['cascade'] = True
-        prepare_matching(update, context)
-    else:
-        update.message.reply_text("Ошибка при сохранении посылки.")
-    return ConversationHandler.END
-
-
 # Define the donate command handler
 def donate(update, context):
     logging.info(f"User {update.message.from_user.username} entered donate function.")
@@ -80,18 +47,6 @@ def donate(update, context):
         return ConversationHandler.END
     # Send a message with the payment card information for donations
     update.message.reply_text(f'Если вам понравился бот, вы можете помочь развивать его сделав перевод по номеру карты Тинькофф 5280 4137 5265 2326 \n\nЗаранее спасибо :)')
-    return ConversationHandler.END  # End the conversation
-
-
-def users_count(update, context):
-    logging.info(f"User {update.message.from_user.username} entered users_count function.")
-    if 'conversation' in context.user_data and context.user_data['conversation']:
-        logging.info(f"Error. User {update.message.from_user.username} tried to start new process without finishing previous.")
-        update.message.reply_text(f"Вы уже находитесь в процессе создания заказа.\nЗакончите его или нажмите /cancel")
-        return ConversationHandler.END
-    # Send a message with the payment card information for donations
-    users = get_unique_usernames()
-    update.message.reply_text(f'У нас в базе {len(users)} юзеров.')
     return ConversationHandler.END  # End the conversation
 
 
@@ -162,16 +117,6 @@ def setup_handlers(updater):
         fallbacks=[CommandHandler('cancel', cancel)]
     )
 
-    # Create and add a conversation handler for showing all orders
-    all_orders_handler = ConversationHandler(
-        entry_points=[CommandHandler('all_orders', show_all_orders)],
-        states={
-            SHOW_CITY_FROM: [MessageHandler(Filters.text & ~Filters.command, show_city_from)],
-            SHOW_CITY_TO: [MessageHandler(Filters.text & ~Filters.command, show_city_to)]
-        },
-        fallbacks=[CommandHandler('cancel', cancel)]
-    )
-
     # Create and add a conversation handler for deleting orders
     delete_handler = ConversationHandler(
         entry_points=[CommandHandler('delete', ask_number)],
@@ -196,7 +141,6 @@ def setup_handlers(updater):
     dp.add_handler(support_handler)
     dp.add_handler(delete_handler)
     dp.add_handler(send_package_handler)
-    dp.add_handler(all_orders_handler)
     dp.add_handler(offer_courier_service_handler)
     dp.add_handler(matching_handler)
 
@@ -205,6 +149,4 @@ def setup_handlers(updater):
     dp.add_handler(CommandHandler('my_orders', my_orders))
     dp.add_handler(CommandHandler('start', start))
     dp.add_handler(CommandHandler('about', about))
-    dp.add_handler(CommandHandler('users_count', users_count))
     dp.add_handler(CommandHandler('refresh_db_backup', refresh_db_backup))
-    dp.add_handler(CommandHandler('cd', cd))
