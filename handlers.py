@@ -2,8 +2,6 @@ import logging
 
 from telegram.ext import CommandHandler, ConversationHandler, CallbackContext, MessageHandler, \
     Filters
-from database import get_unique_usernames, export_requests_to_csv_and_upload, \
-    save_order_in_database
 from telegram import Update
 
 from services.delete import ASK_NUMBER, KILL_THAT_BITCH, ask_number, kill_that_bitch
