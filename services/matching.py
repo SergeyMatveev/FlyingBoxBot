@@ -4,7 +4,7 @@ from telegram import Update, Bot
 from telegram.ext import ConversationHandler, CallbackContext
 
 from constants import TOKEN
-from database import find_matches, get_active_orders, connect_to_database, get_order_data
+from database import find_matches, get_active_orders, connect_to_database, get_order_data, record_match
 
 PREPARE_MATCHING, MATCHING = range(2)
 
@@ -110,6 +110,10 @@ def send_notification(update, context, orders_to_notify):
     """
     bot = Bot(TOKEN)
     order = get_order_data(context.user_data['order_id'])
+
+    for _order in orders_to_notify:
+        matched_order_id = _order[0]
+        record_match(order[0], matched_order_id)
 
     for order_to_notify in orders_to_notify:
         try:

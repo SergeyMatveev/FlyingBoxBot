@@ -202,3 +202,34 @@ def find_matches(order_id):
         return matches
 
 
+def get_active_orders_count():
+    # SQL-запрос для подсчёта активных заказов
+    query = """
+    SELECT COUNT(*)
+    FROM orders
+    WHERE is_completed = FALSE
+    """
+
+    # Установка соединения с базой данных
+    connection = connect_to_database()
+    cursor = connection.cursor()
+
+    # Выполнение запроса и получение результата
+    cursor.execute(query)
+    active_orders_count = cursor.fetchone()[0]
+
+    # Закрытие соединения с базой данных
+    cursor.close()
+    connection.close()
+
+    return active_orders_count
+
+
+def record_match(order_id, matched_order_id):
+    try:
+        with connect_to_database() as conn:
+            with conn.cursor() as cur:
+                cur.execute("INSERT INTO matches (new_order_id, matched_order_id) VALUES (%s, %s)", (order_id, matched_order_id))
+                conn.commit()
+    except Exception as e:
+        logging.error(f"Error in record_match: {e}")
