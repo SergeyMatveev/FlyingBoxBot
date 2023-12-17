@@ -51,7 +51,7 @@ def export_data_to_csv_and_upload(table_name):
     file_metadata = {
         'name': filename,
         'mimeType': 'text/csv',
-        'parents': ['1fZDZfZK3eoTgsaRIuo-D889rcJbGM2QG']
+        'parents': ['18iWsBXfaGjESM5cw4-1vVxcWS6ThzHyz']
     }
     media = MediaIoBaseUpload(csv_buffer, mimetype='text/csv', resumable=True)
     service.files().create(body=file_metadata, media_body=media, fields='id').execute()

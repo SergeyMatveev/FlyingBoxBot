@@ -108,36 +108,6 @@ def get_unique_usernames():
     return unique_usernames
 
 
-def export_requests_to_csv_and_upload():
-    # Подключение к базе данных
-    conn = connect_to_database()
-    # Запрос данных из таблицы requests
-    df = pd.read_sql("SELECT * FROM orders", conn)
-    conn.close()
-
-    # Сохранение данных в CSV-файл в памяти как байтовый поток
-    csv_buffer = io.BytesIO()
-    df.to_csv(csv_buffer, index=False, encoding='utf-8')
-    csv_buffer.seek(0)
-
-    # Аутентификация в Google Drive API
-    credentials = service_account.Credentials.from_service_account_file(
-        'sergey_google_account.json',
-        scopes=['https://www.googleapis.com/auth/drive']
-    )
-    service = build('drive', 'v3', credentials=credentials)
-
-    # Загрузка файла на Google Drive
-    file_metadata = {
-        'name': 'orders.csv',
-        'mimeType': 'text/csv',
-        'parents': ['1fZDZfZK3eoTgsaRIuo-D889rcJbGM2QG']
-    }
-    media = MediaIoBaseUpload(csv_buffer, mimetype='text/csv', resumable=True)
-    service.files().create(body=file_metadata, media_body=media, fields='id').execute()
-    return True
-
-
 def get_order_data(order_id):
     """
     Получение данных заявки по ее ID.
