@@ -118,7 +118,7 @@ def date_of_flight(update, context):
         formatted_date = parsed_date.strftime('%Y-%m-%d')  # Форматируем дату для БД
 
         today = date.today()  # Текущая дата
-        nine_months_from_now = today + relativedelta(months=+9)  # Дата через 9 месяцев от сегодня
+        nine_months_from_now = today + relativedelta(months=+3)  # Дата через 3 месяцев от сегодня
 
         if parsed_date <= today:
             update.message.reply_text("Вы ввели дату в прошлом. Пожалуйста, введите дату в будущем.")
@@ -126,7 +126,7 @@ def date_of_flight(update, context):
 
         if parsed_date > nine_months_from_now:
             update.message.reply_text(
-                "По вашей дате отправления совпадений не будет найдено, введите дату в пределах 9 месяцев от сегодняшнего дня.")
+                "По вашей дате отправления совпадений не будет найдено, введите дату в пределах 3 месяцев от сегодняшнего дня.")
             return DATE_OF_FLIGHT
 
         context.user_data['date_of_flight'] = formatted_date

@@ -144,7 +144,7 @@ def send_date(update, context):
         formatted_date = parsed_date.strftime('%Y-%m-%d')  # Форматируем дату для БД
 
         today = date.today()  # Текущая дата
-        nine_months_from_now = today + relativedelta(months=+9)  # Дата через 9 месяцев от сегодня
+        nine_months_from_now = today + relativedelta(months=+3)  # Дата через 3 месяцев от сегодня
 
         if parsed_date <= today:
             update.message.reply_text("Пожалуйста, введите дату в будущем:")
@@ -152,7 +152,7 @@ def send_date(update, context):
 
         if parsed_date > nine_months_from_now:
             update.message.reply_text(
-                "Введите дату в пределах 9 месяцев от сегодняшнего дня:")
+                "Введите дату в пределах 3 месяцев от сегодняшнего дня:")
             return SEND_DATE
 
         context.user_data['send_date'] = formatted_date
