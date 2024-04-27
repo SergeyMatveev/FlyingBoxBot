@@ -1,11 +1,5 @@
 import psycopg2
 import logging
-import io
-from googleapiclient.http import MediaIoBaseUpload
-import pandas as pd
-from google.oauth2 import service_account
-from googleapiclient.discovery import build
-from datetime import datetime
 
 from constants import DATABASE_NAME, DATABASE_USER, DATABASE_PASSWORD, DATABASE_HOST, DATABASE_PORT, MAX_DATE_DIFF
 

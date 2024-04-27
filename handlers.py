@@ -10,6 +10,8 @@ from services.my_orders import my_orders
 from services.offer_courier_service import origin_city, destination_city, comment, ORIGIN_CITY, DESTINATION_CITY, \
     COMMENT, DATE_OF_FLIGHT, \
     date_of_flight, offer_courier_service, weight2, WEIGHT2
+from services.prohodki import create_order, user_name, USER_NAME_START, PLACE_START, LOUNGE_NAME_START, place, \
+    lounge_name
 from services.request_support import ask_for_issue, FORWARD_TO_GROUP, forward_to_group
 from services.send_package import send_package, CITY_FROM, CITY_TO, WEIGHT, SEND_DATE, \
     WHAT_IS_INSIDE, city_from, city_to, weight, send_date, what_is_inside
@@ -34,6 +36,10 @@ def start(update, context):
         f'- /help - тут можно описать проблему и мы поможем ее решить\n'
         f'- /donate - помочь нам и поддержать проект\n'
         f'- /about - информация о нас и краткая справка')
+
+    chat_id = update.message.chat_id
+    update.message.reply_text(f'ID этого чата: {chat_id}')
+
     return ConversationHandler.END
 
 
@@ -78,6 +84,23 @@ def about(update, context):
         f'- /about - информация о нас и краткая справка')
 
     return ConversationHandler.END  # End the conversation
+
+
+def forward_photo(update: Update, context: CallbackContext) -> None:
+    chat_id = '-1002000757373'  # ID группы, куда нужно переслать фото
+    # Извлекаем имя и фамилию пользователя из сохраненных данных
+    user_name = context.user_data.get('user_name', 'Неизвестный пользователь')
+    username = update.message.from_user.username
+
+    # Получаем объект фотографии с наивысшим разрешением
+    photo_file = update.message.photo[-1].get_file()
+    # Скачиваем фото
+    photo_file.download('photo.jpg')
+
+    # Отправляем фото в группу с подписью, содержащей имя и фамилию
+    caption = f"Фото от {user_name}, @{username}"
+    context.bot.send_photo(chat_id=chat_id, photo=open('photo.jpg', 'rb'), caption=caption)
+    update.message.reply_text(f"Спасибо! Ожидайте QR-код. Среднее время ожидания 15 минут.\nЕсли у вас возникнут вопросы, свяжитесь с нами /help")
 
 
 # Setup the command handlers for the telegram bot
@@ -139,15 +162,30 @@ def setup_handlers(updater):
         fallbacks=[CommandHandler('cancel', cancel)]
     )
 
+    # Create and add a conversation handler for the 'send package' workflow
+    create_order_handler = ConversationHandler(
+        entry_points=[CommandHandler('lounge', create_order)],
+        states={
+            USER_NAME_START: [MessageHandler(Filters.text & ~Filters.command, user_name)],
+            PLACE_START: [MessageHandler(Filters.text & ~Filters.command, place)],
+            LOUNGE_NAME_START: [MessageHandler(Filters.text & ~Filters.command, lounge_name)]
+        },
+        fallbacks=[CommandHandler('cancel', cancel)],
+    )
+
     # Register each handler with the dispatcher
     dp.add_handler(support_handler)
     dp.add_handler(delete_handler)
     dp.add_handler(send_package_handler)
     dp.add_handler(offer_courier_service_handler)
     dp.add_handler(matching_handler)
+    dp.add_handler(create_order_handler)
 
     dp.add_handler(CommandHandler('donate', donate))
     dp.add_handler(CommandHandler('cancel', cancel))
     dp.add_handler(CommandHandler('my_orders', my_orders))
     dp.add_handler(CommandHandler('start', start))
     dp.add_handler(CommandHandler('about', about))
+    photo_handler = MessageHandler(Filters.photo, forward_photo)
+    dp.add_handler(photo_handler)
+
