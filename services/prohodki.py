@@ -1,7 +1,6 @@
 import logging
 
 from telegram.ext import ConversationHandler
-from database import save_order_in_database
 
 USER_NAME_START, PLACE_START, LOUNGE_NAME_START = range(3)
 
@@ -31,7 +30,7 @@ def user_name(update, context):
 
     context.user_data['user_name'] = user_name
 
-    update.message.reply_text(f"Шаг 2/4. Введите город и страну в которой нужна проходка")
+    update.message.reply_text(f"Шаг 2/4. Введите город, страну и название аэропорта в котором нужна проходка")
 
     return PLACE_START
 
@@ -48,7 +47,7 @@ def place(update, context):
     context.user_data['user_place'] = user_place
 
     update.message.reply_text(
-        f"Шаг 3/4. Введите название конкретного Бизнес-зала в который вам нужен проход:\nЭто можно найти на сайте или в аэропорту.")
+        f"Шаг 3/4. Введите название конкретного бизнес-зала в который вам нужен проход:\nИнформацию обычно можно найти на сайте или по прилету в аэропорту.")
 
     return LOUNGE_NAME_START
 
@@ -65,7 +64,10 @@ def lounge_name(update, context):
     send_data_to_group(update, context)
 
     update.message.reply_text(
-        "Шаг 4/4. Ваши данные сохранены.\nПереведите оплату из расчёта 800 рублей за одного человека\nНомер карты 5280413752652326\n\nПришлите скрин об оплате в данный чат.\n\nПосле оплаты в течение 15 минут вы получите подтверждение от оператора.")
+        "Шаг 4/4. Ваша заявка сохранена и ожидает оплаты.\nПереведите оплату из расчёта 900 рублей за одного "
+        "человека\nНомер карты 5280413752652326\n\nВ подтверждении оплаты, пожалуйста, пришлите скрин об оплате в данный чат.\n\n"
+        "После оплаты в течение 15-30 минут вы получите подтверждение от оператора и QR-код от бота. QR-код вместе с "
+        "посадочным талоном вам нужно показать на входе в бизнес зал.")
 
     return ConversationHandler.END
 
