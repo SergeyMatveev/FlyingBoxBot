@@ -78,4 +78,5 @@ def send_data_to_group(update, context):
                     f"Фамилия и имя: {context.user_data['user_name']}\n"
                     f"Город и страна: {context.user_data['user_place']}\n"
                     f"Бизнес-зал: {context.user_data['lounge_name']}")
+    message_text = (f"Это заказ от юзера @{update.message.from_user.username}")
     context.bot.send_message(chat_id=chat_id, text=message_text)
