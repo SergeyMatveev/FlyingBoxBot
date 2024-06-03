@@ -1,7 +1,8 @@
-#Production bot
-
-#TOKEN = '6834685906:AAFvaq9yA7ABl9nTDQaDWf5VF8lmiPox0QA'
+#Production flyingbox bot
 TOKEN = '6204132043:AAGsy6mKP485rFaBVGeeg6p1dSknDo76jlc'
+
+#Prohodki_bot:
+#TOKEN = '6834685906:AAFvaq9yA7ABl9nTDQaDWf5VF8lmiPox0QA'
 
 #Test bot
 #TOKEN = '7156106141:AAERk9199snO82K64yR3Dn4FKHnzIRfPv-U'

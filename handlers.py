@@ -10,8 +10,8 @@ from services.my_orders import my_orders
 from services.offer_courier_service import origin_city, destination_city, comment, ORIGIN_CITY, DESTINATION_CITY, \
     COMMENT, DATE_OF_FLIGHT, \
     date_of_flight, offer_courier_service, weight2, WEIGHT2
-from services.prohodki import create_order, user_name, USER_NAME_START, PLACE_START, LOUNGE_NAME_START, place, \
-    lounge_name
+from services.prohodki import create_order, user_name_surname, USER_NAME_START, PLACE_START, LOUNGE_NAME_START, place, \
+    lounge_name, collect_username, COLLECT_USERNAME, collect_date, COLLECT_DATE
 from services.request_support import ask_for_issue, FORWARD_TO_GROUP, forward_to_group
 from services.send_package import send_package, CITY_FROM, CITY_TO, WEIGHT, SEND_DATE, \
     WHAT_IS_INSIDE, city_from, city_to, weight, send_date, what_is_inside
@@ -166,8 +166,10 @@ def setup_handlers(updater):
     create_order_handler = ConversationHandler(
         entry_points=[CommandHandler('lounge', create_order)],
         states={
-            USER_NAME_START: [MessageHandler(Filters.text & ~Filters.command, user_name)],
+            USER_NAME_START: [MessageHandler(Filters.text & ~Filters.command, user_name_surname)],
             PLACE_START: [MessageHandler(Filters.text & ~Filters.command, place)],
+            COLLECT_USERNAME: [MessageHandler(Filters.text & ~Filters.command, collect_username)],
+            COLLECT_DATE: [MessageHandler(Filters.text & ~Filters.command, collect_date)],
             LOUNGE_NAME_START: [MessageHandler(Filters.text & ~Filters.command, lounge_name)]
         },
         fallbacks=[CommandHandler('cancel', cancel)],
